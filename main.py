@@ -1,13 +1,16 @@
 from collections import defaultdict
 import pickle
-from time import sleep
+import uuid
+#from time import sleep
+
+key = 0
 
 class DB:
     def __init__(self):
         self.db = defaultdict(list)
 
     def enable_repl(self):
-        self.db["complete"] = 1
+        self.db["complete"] = key
         self.savetofile("db1_repl")
         self.savetofile("db2_repl")
 
@@ -48,11 +51,11 @@ class DB:
         done1 = False
         done2 = False
         if db1_flag:
-            if db1.db["complete"] == 1:
+            if db1.db["complete"] == key:
                 lbd(db1, k)
                 done1 = True
         if (not done1) and db2_flag:
-            if db2.db["complete"] == 1:
+            if db2.db["complete"] == key:
                 lbd(db2, k)
                 done2 = True
         if (not done1) and (not done2):
@@ -73,6 +76,7 @@ class DB:
         self.change_repl_3(k, v, lambda dbs, k, v: dbs.update(k, v))
 
     def change_repl_3(self, k, v, lbd):
+        global key
         db1 = DB()
         db2 = DB()
         db1_flag = False
@@ -92,21 +96,29 @@ class DB:
         done1 = False
         done2 = False
         if db1_flag:
-            if db1.db["complete"] == 1:
+            if db1.db["complete"] == key:
                 #db1.db[k] = [v]
                 lbd(db1, k, v)
                 done1 = True
         if (not done1) and db2_flag:
-            if db2.db["complete"] == 1:
+            if db2.db["complete"] == key:
                 #db2.db[k] = [v]
                 lbd(db1, k, v)
                 done2 = True
         if (not done1) and (not done2):
             raise MemoryError("db corrupted")
         if done1:
+            newkey = uuid.uuid1()
+            db1.db["complete"] = newkey
+            #global key
+            key = newkey
             db1.savetofile("db1_repl")
             db1.savetofile("db2_repl")
         if done2:
+            newkey = uuid.uuid1()
+            db2.db["complete"] = newkey
+            #global key
+            key = newkey
             db2.savetofile("db1_repl")
             db2.savetofile("db2_repl")
         #print "create success"
@@ -119,6 +131,7 @@ class DB:
         self.change_repl_2(k, lambda dbs, k: dbs.delete(k))
 
     def change_repl_2(self, k, lbd):
+        global key
         db1 = DB()
         db2 = DB()
         db1_flag = False
@@ -138,21 +151,29 @@ class DB:
         done1 = False
         done2 = False
         if db1_flag:
-            if db1.db["complete"] == 1:
+            if db1.db["complete"] == key:
                 #db1.db[k] = list()
                 lbd(db1, k)
                 done1 = True
         if (not done1) and db2_flag:
-            if db2.db["complete"] == 1:
+            if db2.db["complete"] == key:
                 #db2.db[k] = list()
                 lbd(db2, k)
                 done2 = True
         if (not done1) and (not done2):
             raise MemoryError("db corrupted")
         if done1:
+            newkey = uuid.uuid1()
+            db1.db["complete"] = newkey
+            #global key
+            key = newkey
             db1.savetofile("db1_repl")
             db1.savetofile("db2_repl")
         if done2:
+            newkey = uuid.uuid1()
+            db2.db["complete"] = newkey
+            #global key
+            key = newkey
             db2.savetofile("db1_repl")
             db2.savetofile("db2_repl")
         #print "delete success"
@@ -188,13 +209,13 @@ class DB:
         done1 = False
         done2 = False
         if db1_flag:
-            if db1.db["complete"] == 1:
+            if db1.db["complete"] == key:
                 pickle.dump(self.db, open(filename, "wb"))
                 db1.savetofile(filename)
                 #db1.savetofile("db2_repl")
                 done1 = True
         if (not done1) and db2_flag:
-            if db2.db["complete"] == 1:
+            if db2.db["complete"] == key:
                 pickle.dump(self.db, open(filename, "wb"))
                 db2.savetofile(filename)
                 #db2.savetofile("db2_repl")
@@ -215,7 +236,7 @@ class DB:
             db1_flag = True
         done1 = False
         if db1_flag:
-            if db1.db["complete"] == 1:
+            if db1.db["complete"] == key:
                 self.db = pickle.load(open(filename, "rb"))
                 self.savetofile("db1_repl")
                 self.savetofile("db2_repl")
@@ -250,10 +271,7 @@ DB_API_func_3_repl = {
     "update": lambda dbs, k, v: dbs.update_repl(k, v),
 }
 
-db = DB()
-db.enable_repl()
-
-#standard target
+#std target
 '''
 db.create_repl("k1", 1)
 
@@ -294,7 +312,14 @@ db.loadfromfile_repl("mydb")
 db.read_s_repl("k1")
 '''
 
+db = DB()
+key = uuid.uuid1()
+db.enable_repl()
+print "new db created"
+print "API:"
+print "create, update, delete, read, savetofile, readfromfile"
 while True:
+    print ">>",
     command = raw_input().split()
     if command[0] == "exit":
         exit()
