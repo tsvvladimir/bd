@@ -1,7 +1,6 @@
 from collections import defaultdict
 import pickle
 import uuid
-#from time import sleep
 
 key = 0
 
@@ -36,14 +35,12 @@ class DB:
         db2_flag = False
         try:
             db1.loadfromfile("db1_repl")
-            #print db1.db
         except IOError as e:
             print "db recovered"
         else:
             db1_flag = True
         try:
             db2.loadfromfile("db2_repl")
-            #print db1.db
         except IOError as e:
             print "db recovered"
         else:
@@ -97,12 +94,10 @@ class DB:
         done2 = False
         if db1_flag:
             if db1.db["complete"] == key:
-                #db1.db[k] = [v]
                 lbd(db1, k, v)
                 done1 = True
         if (not done1) and db2_flag:
             if db2.db["complete"] == key:
-                #db2.db[k] = [v]
                 lbd(db1, k, v)
                 done2 = True
         if (not done1) and (not done2):
@@ -110,18 +105,15 @@ class DB:
         if done1:
             newkey = uuid.uuid1()
             db1.db["complete"] = newkey
-            #global key
             key = newkey
             db1.savetofile("db1_repl")
             db1.savetofile("db2_repl")
         if done2:
             newkey = uuid.uuid1()
             db2.db["complete"] = newkey
-            #global key
             key = newkey
             db2.savetofile("db1_repl")
             db2.savetofile("db2_repl")
-        #print "create success"
 
     def delete(self, k):
         self.db[k] = list()
@@ -152,12 +144,10 @@ class DB:
         done2 = False
         if db1_flag:
             if db1.db["complete"] == key:
-                #db1.db[k] = list()
                 lbd(db1, k)
                 done1 = True
         if (not done1) and db2_flag:
             if db2.db["complete"] == key:
-                #db2.db[k] = list()
                 lbd(db2, k)
                 done2 = True
         if (not done1) and (not done2):
@@ -165,43 +155,35 @@ class DB:
         if done1:
             newkey = uuid.uuid1()
             db1.db["complete"] = newkey
-            #global key
             key = newkey
             db1.savetofile("db1_repl")
             db1.savetofile("db2_repl")
         if done2:
             newkey = uuid.uuid1()
             db2.db["complete"] = newkey
-            #global key
             key = newkey
             db2.savetofile("db1_repl")
             db2.savetofile("db2_repl")
-        #print "delete success"
 
     def savetofile(self, filename):
         pickle.dump(self.db, open(filename, "wb"))
-        #print "save success"
 
     def loadfromfile(self, filename):
         self.db = pickle.load(open(filename, "rb"))
-        #print "load success"
 
     def savetofile_repl(self, filename):
-        #pickle.dump(self.db, open(filename, "wb"))
         db1 = DB()
         db2 = DB()
         db1_flag = False
         db2_flag = False
         try:
             db1.loadfromfile("db1_repl")
-            #print db1.db
         except IOError as e:
             print "db recovered"
         else:
             db1_flag = True
         try:
             db2.loadfromfile("db2_repl")
-            #print db1.db
         except IOError as e:
             print "db recovered"
         else:
@@ -212,13 +194,11 @@ class DB:
             if db1.db["complete"] == key:
                 pickle.dump(self.db, open(filename, "wb"))
                 db1.savetofile(filename)
-                #db1.savetofile("db2_repl")
                 done1 = True
         if (not done1) and db2_flag:
             if db2.db["complete"] == key:
                 pickle.dump(self.db, open(filename, "wb"))
                 db2.savetofile(filename)
-                #db2.savetofile("db2_repl")
                 done2 = True
         if (not done1) and (not done2):
             raise MemoryError("db corrupted")
@@ -229,7 +209,6 @@ class DB:
         db1_flag = False
         try:
             db1.loadfromfile(filename)
-            #print db1.db
         except IOError as e:
             raise e
         else:
@@ -270,47 +249,6 @@ DB_API_func_3_repl = {
     "create": lambda dbs, k, v: dbs.create_repl(k, v),
     "update": lambda dbs, k, v: dbs.update_repl(k, v),
 }
-
-#std target
-'''
-db.create_repl("k1", 1)
-
-db.read_s_repl("k1")
-db.read_s_repl("k2")
-
-db.create_repl("k1", 2)
-
-db.read_s_repl("k1")
-
-db.update_repl("k2", 3)
-db.update_repl("k2", 4)
-
-db.read_s_repl("k2")
-
-db.delete_repl("k1")
-
-db.read_s_repl("k1")
-
-db.savetofile_repl("mydb")
-
-db.update_repl("k1", 666)
-
-db.loadfromfile_repl("mydb")
-
-db.read_s_repl("k1")
-'''
-#load save target
-'''
-db.create_repl("k1", 333)
-
-db.savetofile_repl("mydb")
-
-db.create_repl("k1", 666)
-
-db.loadfromfile_repl("mydb")
-
-db.read_s_repl("k1")
-'''
 
 db = DB()
 key = uuid.uuid1()
